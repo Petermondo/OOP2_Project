@@ -7,116 +7,97 @@ public class Login extends JPanel {
     public Login(CardLayout layout, JPanel container) {
         setLayout(new BorderLayout());
 
-        // Image Panel
+        // image
         JPanel imagePanel = new JPanel() {
-            @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                ImageIcon icon = new ImageIcon("assets/airport.jpg");
-                if (icon.getImageLoadStatus() == MediaTracker.COMPLETE) {
-                    Image image = icon.getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_SMOOTH);
-                    g.drawImage(image, 0, 0, this);
-                } else {
-                    g.setColor(Color.LIGHT_GRAY);
-                    g.fillRect(0, 0, getWidth(), getHeight());
-                    g.setColor(Color.BLACK);
-                    g.drawString("Image not found", 10, 20);
-                }
+                g.drawImage(new ImageIcon("Assets/airport.jpg").getImage(), 0, 0, getWidth(), getHeight(), this);
             }
 
-            @Override
             public Dimension getPreferredSize() {
-                return new Dimension(0, 450);
+                return new Dimension(0, 300);
             }
         };
 
-        // Form Panel
+        // Login area
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         formPanel.setBackground(Color.WHITE);
 
         JLabel titleLabel = new JLabel("USER LOGIN");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
+        UIUtils.styleTitle(titleLabel);
 
-        JTextField emailField = new JTextField();
-        JPasswordField passwordField = new JPasswordField();
-
-        UIUtils.styleField(emailField);
-        UIUtils.styleField(passwordField);
-
+        JPanel emailPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel emailLabel = new JLabel("EMAIL");
+        emailPanel.add(emailLabel);
+        UIUtils.stylePanel(emailPanel);
+
+        JPanel emailFieldPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JTextField emailField = new JTextField();
+        emailFieldPanel.add(emailField);
+        UIUtils.stylePanel(emailFieldPanel);
+
+
+        JPanel passPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel passLabel = new JLabel("PASSWORD");
+        passPanel.add(passLabel);
+        UIUtils.stylePanel(passPanel);
+
+        JPanel passFieldPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPasswordField passwordField = new JPasswordField();
+        passFieldPanel.add(passwordField);
+        UIUtils.stylePanel(passFieldPanel);
 
         UIUtils.styleLabel(emailLabel);
         UIUtils.styleLabel(passLabel);
+        UIUtils.styleField(emailField);
+        UIUtils.styleField(passwordField);
+
+        JLabel signUpLink = UIUtils.createLinkLabel("Sign up");
+        JLabel togglePass = UIUtils.createShowPasswordToggle(passwordField);
+
+        JPanel linkPanel = new JPanel(new BorderLayout());
+        linkPanel.setOpaque(false);
+        linkPanel.setMaximumSize(new Dimension(400, 30));
+        linkPanel.add(signUpLink, BorderLayout.WEST);
+        linkPanel.add(togglePass, BorderLayout.EAST);
 
         JButton loginButton = new JButton("Login");
         UIUtils.styleButton(loginButton);
-        loginButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         loginButton.addActionListener(e -> {
-            String email = emailField.getText().trim();
-            String password = new String(passwordField.getPassword()).trim();
-
-            if (email.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Please fill in all fields.",
-                        "Missing Information",
-                        JOptionPane.WARNING_MESSAGE
-                );
+            if (emailField.getText().trim().isEmpty() || new String(passwordField.getPassword()).trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Missing Information", JOptionPane.WARNING_MESSAGE);
             } else {
-                System.out.println("Welcome: " + email);
-                // Proceed to dashboard logic if needed
+                System.out.println("Welcome: " + emailField.getText().trim());
+                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                topFrame.setContentPane(new PassengerDashboard(emailField.getText().trim()));
+                topFrame.revalidate();
             }
         });
 
-        // Links: Sign Up & Show Password
-        JPanel linkPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        linkPanel.setOpaque(false);
-        JLabel signUpLink = new JLabel("<HTML><U>Sign Up</U></HTML>");
-        JLabel togglePass = new JLabel("<HTML><U>Show Password</U></HTML>");
-        signUpLink.setForeground(Color.BLUE);
-        togglePass.setForeground(Color.BLUE);
-
-        signUpLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        togglePass.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
         signUpLink.addMouseListener(new MouseAdapter() {
-            @Override
             public void mouseClicked(MouseEvent e) {
                 layout.show(container, "signup");
             }
         });
 
-        togglePass.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                passwordField.setEchoChar(passwordField.getEchoChar() == 0 ? '•' : (char) 0);
-            }
-        });
-
-        linkPanel.add(signUpLink);
-        linkPanel.add(Box.createHorizontalStrut(20));
-        linkPanel.add(togglePass);
-
-        // Assemble Form
         formPanel.add(titleLabel);
-        formPanel.add(emailLabel);
-        formPanel.add(emailField);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        formPanel.add(passLabel);
-        formPanel.add(passwordField);
+        formPanel.add(emailPanel);
+        formPanel.add(emailFieldPanel);
+        formPanel.add(passPanel);
+        formPanel.add(passFieldPanel);
         formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         formPanel.add(linkPanel);
         formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         formPanel.add(loginButton);
 
-        // Add panels
-        add(imagePanel, BorderLayout.CENTER);
-        add(formPanel, BorderLayout.SOUTH);
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        bottomPanel.setBackground(Color.WHITE);
+        bottomPanel.add(formPanel);
+
+        add(imagePanel, BorderLayout.NORTH);
+        add(bottomPanel, BorderLayout.CENTER);
     }
 }
